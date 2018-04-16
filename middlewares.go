@@ -32,18 +32,22 @@ func Middlewares(lang string, handler Handler) httprouter.Handle {
 
 		if err := handler(w, r); err != nil {
 			if errors.IsUnauthorized(err) {
+				log.WithField("error", err.Error()).Error("Unauthorized")
 				emitPage(w, http.StatusUnauthorized)
 				return
 			}
 			if errors.IsNotValid(err) {
+				log.WithField("error", err.Error()).Error("Bad Request")
 				emitPage(w, http.StatusBadRequest)
 				return
 			}
 			if errors.IsNotFound(err) {
+				log.WithField("error", err.Error()).Error("Not Found")
 				emitPage(w, http.StatusNotFound)
 				return
 			}
 
+			log.WithField("error", err.Error()).Error("Internal Server Error")
 			emitPage(w, http.StatusInternalServerError)
 			return
 		}
