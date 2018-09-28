@@ -3,27 +3,23 @@ package routing
 import (
 	"net/http"
 	"strings"
-
-	"github.com/juju/errors"
-	"github.com/julienschmidt/httprouter"
-	"golang.org/x/net/context"
 )
 
+// Group registers multiple URLs for each lang for the same handler.
 type Group struct {
+	// Handler that will be called for all langs.
 	Handler Handler
-	URL     map[string]string
+
+	// HTTP method to use. If empty or unknown it will use "GET".
+	Method string
+
+	// Map of language -> URL that should be registered.
+	URL map[string]string
 }
 
-func (g Group) Register(r *httprouter.Router) {
-	for lang, url := range g.URL {
-		r.GET(url, Middlewares(lang, func(w http.ResponseWriter, r *http.Request) error {
-			r = r.WithContext(context.WithValue(r.Context(), groupKey, g))
-
-			return errors.Trace(g.Handler(w, r))
-		}))
-	}
-}
-
+// ResolveURL returns the URL of the group linked to the language we pass. If no
+// URL is found it will return an empty string. It replaces any parameter with
+// the value passed right now in the request.
 func (g Group) ResolveURL(r *http.Request, lang string) string {
 	segments := strings.Split(g.URL[lang], "/")
 	for i, segment := range segments {
