@@ -6,12 +6,9 @@ gofmt:
 	@gofmt -r '&α{} -> new(α)' -w $(FILES)
 
 deps:
-	go get -u github.com/mgechev/revive
-
-	go get -u github.com/altipla-consulting/sentry
-	go get -u github.com/julienschmidt/httprouter
-	go get -u github.com/sirupsen/logrus
+	go get -u github.com/mgechev/reviv
 
 test:
 	revive -formatter friendly
 	go install .
+	go test ./...
