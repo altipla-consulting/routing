@@ -6,7 +6,7 @@ gofmt:
 	@gofmt -r '&α{} -> new(α)' -w $(FILES)
 
 deps:
-	go get -u github.com/mgechev/reviv
+	go get -u github.com/mgechev/revive
 
 test:
 	revive -formatter friendly
