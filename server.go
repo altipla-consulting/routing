@@ -115,6 +115,14 @@ func (s *Server) Group(g Group) {
 	}
 }
 
+// NotFound registers a custom NotFound handler in the routing table. Call
+// routing.NotFoundHandler as fallback inside your handler if you need it.
+func (s *Server) NotFound(lang string, handler Handler) {
+	s.router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.decorate(lang, handler)(w, r, nil)
+	})
+}
+
 func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		r = r.WithContext(context.WithValue(r.Context(), requestKey, r))
