@@ -1,5 +1,7 @@
 github.com/altipla-consulting/sentry v0.2.1 h1:3mlId+KDH5mrA7NbwoHuUjbPy7jfXqEMq1lgJkwgGNI=
 github.com/altipla-consulting/sentry v0.2.1/go.mod h1:+jUWDhpRrbl9c0r8JuFEmzl54B4IQcY9cdADy4GEP5o=
+github.com/altipla-consulting/sentry v0.2.2 h1:1o6YQhPqaItEfM4XknoVGg7VGMB5qHgvCqfwRSgj7gA=
+github.com/altipla-consulting/sentry v0.2.2/go.mod h1:+jUWDhpRrbl9c0r8JuFEmzl54B4IQcY9cdADy4GEP5o=
 github.com/certifi/gocertifi v0.0.0-20180905225744-ee1a9a0726d2 h1:MmeatFT1pTPSVb4nkPmBFN/LRZ97vPjsFKsZrU3KKTs=
 github.com/certifi/gocertifi v0.0.0-20180905225744-ee1a9a0726d2/go.mod h1:GJKEexRPVJrBSOjoqN5VNOIKJ5Q3RViH6eu3puDRwx4=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
