@@ -1,7 +1,7 @@
 module github.com/altipla-consulting/routing
 
 require (
-	github.com/altipla-consulting/sentry v0.2.1
+	github.com/altipla-consulting/sentry v0.2.2
 	github.com/certifi/gocertifi v0.0.0-20180905225744-ee1a9a0726d2 // indirect
 	github.com/getsentry/raven-go v0.0.0-20180903072508-084a9de9eb03 // indirect
 	github.com/juju/errors v0.0.0-20180806074554-22422dad46e1 // indirect
