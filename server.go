@@ -2,9 +2,11 @@ package routing
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"text/template"
 
+	"github.com/altipla-consulting/langs"
 	"github.com/altipla-consulting/sentry"
 	"github.com/julienschmidt/httprouter"
 	log "github.com/sirupsen/logrus"
@@ -41,6 +43,13 @@ func WithSentry(dsn string) ServerOption {
 	}
 }
 
+// WithCustom404 uses a custom 404 template file.
+func WithCustom404(handler Handler) ServerOption {
+	return func(server *Server) {
+		server.handler404 = handler
+	}
+}
+
 // Server configures the routing table.
 type Server struct {
 	router *httprouter.Router
@@ -49,21 +58,41 @@ type Server struct {
 	username, password string
 	sentryClient       *sentry.Client
 	logging            bool
+	handler404         Handler
 }
 
 // NewServer configures a new router with the options.
 func NewServer(opts ...ServerOption) *Server {
-	r := httprouter.New()
-	r.NotFound = http.HandlerFunc(NotFoundHandler)
-
 	s := &Server{
-		router: r,
+		router: httprouter.New(),
 	}
 	for _, opt := range opts {
 		opt(s)
 	}
 
+	if s.handler404 == nil {
+		s.handler404 = s.generic404Handler
+	}
+	s.router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.decorate(langs.ES, s.handler404)(w, r, nil)
+	})
+
 	return s
+}
+
+func (s *Server) generic404Handler(w http.ResponseWriter, r *http.Request) error {
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusNotFound)
+
+	tmpl, err := template.New("error").Parse(errorTemplate)
+	if err != nil {
+		return fmt.Errorf("routing: cannot parse default 404 error template: %v", err)
+	}
+	if err := tmpl.Execute(w, http.StatusNotFound); err != nil {
+		return fmt.Errorf("routing: cannot execute default 404 error template: %v", err)
+	}
+
+	return nil
 }
 
 // Router returns the raw underlying router to make advanced modifications.
@@ -115,14 +144,6 @@ func (s *Server) Group(g Group) {
 	}
 }
 
-// NotFound registers a custom NotFound handler in the routing table. Call
-// routing.NotFoundHandler as fallback inside your handler if you need it.
-func (s *Server) NotFound(lang string, handler Handler) {
-	s.router.NotFound = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		s.decorate(lang, handler)(w, r, nil)
-	})
-}
-
 func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		r = r.WithContext(context.WithValue(r.Context(), requestKey, r))
@@ -132,18 +153,18 @@ func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 		if s.username != "" && s.password != "" {
 			if _, err := r.Cookie("routing.beta"); err != nil && err != http.ErrNoCookie {
 				log.WithField("error", err.Error()).Error("Cannot read cookie")
-				emitPage(w, http.StatusInternalServerError)
+				s.emitError(w, r, http.StatusInternalServerError)
 				return
 			} else if err == http.ErrNoCookie {
 				w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 
 				username, password, ok := r.BasicAuth()
 				if !ok {
-					emitPage(w, http.StatusUnauthorized)
+					s.emitError(w, r, http.StatusUnauthorized)
 					return
 				}
 				if username != s.username || password != s.password {
-					emitPage(w, http.StatusUnauthorized)
+					s.emitError(w, r, http.StatusUnauthorized)
 					return
 				}
 
@@ -162,7 +183,7 @@ func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 			if httperr, ok := err.(Error); ok {
 				switch httperr.StatusCode {
 				case http.StatusNotFound, http.StatusUnauthorized, http.StatusBadRequest:
-					emitPage(w, httperr.StatusCode)
+					s.emitError(w, r, httperr.StatusCode)
 					return
 				default:
 					err = Internal("unknown routing error: %s", err)
@@ -175,12 +196,17 @@ func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 				s.sentryClient.ReportRequest(err, r)
 			}
 
-			emitPage(w, http.StatusInternalServerError)
+			s.emitError(w, r, http.StatusInternalServerError)
 		}
 	}
 }
 
-func emitPage(w http.ResponseWriter, status int) {
+func (s *Server) emitError(w http.ResponseWriter, r *http.Request, status int) {
+	if status == http.StatusNotFound {
+		s.router.NotFound.ServeHTTP(w, r)
+		return
+	}
+
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(status)
 
@@ -193,10 +219,4 @@ func emitPage(w http.ResponseWriter, status int) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		log.WithField("error", err.Error()).Error("Cannot execute template")
 	}
-}
-
-// NotFoundHandler is configured inside the router as the default 404 page. If you
-// change the handler you can call this function as a fallback.
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	emitPage(w, http.StatusNotFound)
 }
