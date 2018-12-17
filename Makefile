@@ -12,3 +12,8 @@ test:
 	revive -formatter friendly
 	go install .
 	go test ./...
+
+update-deps:
+	go get -u
+	go mod download
+	go mod tidy
