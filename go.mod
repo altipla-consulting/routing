@@ -1,19 +1,17 @@
 module github.com/altipla-consulting/routing
 
 require (
+	github.com/altipla-consulting/errors v1.0.0
 	github.com/altipla-consulting/langs v0.2.0
-	github.com/altipla-consulting/sentry v0.2.2
+	github.com/altipla-consulting/sentry v0.3.1
 	github.com/certifi/gocertifi v0.0.0-20180905225744-ee1a9a0726d2 // indirect
-	github.com/getsentry/raven-go v0.0.0-20180903072508-084a9de9eb03 // indirect
-	github.com/juju/errors v0.0.0-20180806074554-22422dad46e1 // indirect
-	github.com/juju/loggo v0.0.0-20180524022052-584905176618 // indirect
-	github.com/juju/testing v0.0.0-20180920084828-472a3e8b2073 // indirect
-	github.com/julienschmidt/httprouter v0.0.0-20180715161854-348b672cd90d
-	github.com/kr/pretty v0.1.0 // indirect
+	github.com/getsentry/raven-go v0.2.0 // indirect
+	github.com/julienschmidt/httprouter v1.2.0
 	github.com/pkg/errors v0.8.0 // indirect
-	github.com/sirupsen/logrus v1.1.0
-	golang.org/x/net v0.0.0-20180926154720-4dfa2610cdf3 // indirect
-	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
-	gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce // indirect
-	gopkg.in/yaml.v2 v2.2.1 // indirect
+	github.com/sirupsen/logrus v1.2.0
+	golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9 // indirect
+	golang.org/x/sync v0.0.0-20181108010431-42b317875d0f // indirect
+	golang.org/x/sys v0.0.0-20181217223516-dcdaa6325bcb // indirect
+	google.golang.org/genproto v0.0.0-20181217211110-85e460127115 // indirect
+	google.golang.org/grpc v1.17.0 // indirect
 )
