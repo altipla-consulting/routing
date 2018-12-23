@@ -177,13 +177,6 @@ func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 		}
 
 		if err := handler(w, r); err != nil {
-			if s.logging {
-				log.WithFields(log.Fields{
-					"error":   err.Error(),
-					"details": altiplaerrors.Details(err),
-				}).Errorf("Handler failed")
-			}
-
 			if httperr, ok := err.(Error); ok {
 				switch httperr.StatusCode {
 				case http.StatusNotFound, http.StatusUnauthorized, http.StatusBadRequest:
@@ -194,6 +187,13 @@ func (s *Server) decorate(lang string, handler Handler) httprouter.Handle {
 				}
 			} else {
 				err = Internal("internal error: %s", err)
+			}
+			
+			if s.logging {
+				log.WithFields(log.Fields{
+					"error":   err.Error(),
+					"details": altiplaerrors.Details(err),
+				}).Errorf("Handler failed")
 			}
 
 			if s.sentryClient != nil {
